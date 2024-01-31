@@ -1,0 +1,48 @@
+package app
+
+import (
+  "fmt"
+
+  "github.com/gobeli/pocketbase-htmx/lib"
+	"github.com/pocketbase/pocketbase/models"
+)
+
+templ TodosList(todos []*models.Record) {
+	@lib.BaseLayout() {
+    <h1>Todos</h1>
+
+    <ul>
+      for _, v := range todos {
+        <li data-id={v.Id}>
+          {v.GetString("name")}
+          <button hx-delete={fmt.Sprintf("/app/todos/%s", v.Id)} hx-target={fmt.Sprintf("[data-id='%s']", v.Id)} hx-swap="outerHTML">X</button>
+        </li>
+      }
+    </ul>
+
+    <a href="todos/add" hx-boost="true">Add todo</a>
+	}
+}
+
+templ TodoAdd(form *AddTodoFormValue, err error) {
+  @lib.BaseLayout() {
+    @TodoAddForm(form, err)
+  }
+}
+
+templ TodoAddForm(form *AddTodoFormValue, err error) {
+	<form method="POST" hx-boost="true">
+		<div>
+			<label>Name</label>
+			<input type="text" name="name" id="name" 
+        if form != nil {
+          value={form.name}
+        }
+      />
+		</div>
+		if err != nil {
+			<p>{err.Error()}</p>
+		}
+		<button type="submit">Submit</button>
+	</form>
+}

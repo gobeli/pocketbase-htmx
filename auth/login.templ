@@ -1,0 +1,26 @@
+package auth
+
+import "github.com/gobeli/pocketbase-htmx/lib"
+
+templ Login(form LoginFormValue, err error) {
+	@lib.BaseLayout() {
+		@LoginForm(form, err)
+	}
+}
+
+templ LoginForm(form LoginFormValue, err error) {
+	<form method="POST" action="/auth/login" hx-boost="true">
+		<div>
+			<label>Username</label>
+			<input type="text" name="username" id="username" value={form.username} />
+		</div>
+		<div>
+			<label>Password</label>
+			<input type="password" name="password" id="password" />
+		</div>
+		if err != nil {
+			<p>{err.Error()}</p>
+		}
+		<button type="submit">Login</button>
+	</form>
+}

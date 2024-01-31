@@ -1,0 +1,17 @@
+package app
+
+import (
+	"github.com/pocketbase/pocketbase/models"
+  "github.com/gobeli/pocketbase-htmx/lib"
+)
+
+templ Profile(user *models.Record) {
+	@lib.BaseLayout() {
+    <h1>{user.Username()}</h1>
+    <p>Id: {user.GetId()}</p>
+    <form method="post" action="/auth/logout" hx-boost="true">
+      <button type="submit">Logout</button>
+    </form>
+    <a href="todos">Todos</a>
+	}
+}
