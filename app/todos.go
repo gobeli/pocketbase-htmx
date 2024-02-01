@@ -33,7 +33,7 @@ func TodoDelete(e *core.ServeEvent) func(echo.Context) error {
 
 		e.App.Dao().DeleteRecord(record)
 
-		return c.NoContent(200)
+		return lib.HtmxRedirect(c, "/app/todos")
 	}
 }
 

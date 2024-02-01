@@ -13,5 +13,5 @@ func InitAppRoutes(e *core.ServeEvent, pb *pocketbase.PocketBase) {
 	appGroup.GET("/todos", TodosGet(e))
 	appGroup.GET("/todos/add", TodoAddGet)
 	appGroup.POST("/todos/add", TodoAddPost(e))
-	appGroup.DELETE("/todos/:id", TodoDelete(e))
+	appGroup.POST("/todos/:id/delete", TodoDelete(e))
 }

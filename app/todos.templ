@@ -1,8 +1,6 @@
 package app
 
 import (
-  "fmt"
-
   "github.com/gobeli/pocketbase-htmx/lib"
   "github.com/pocketbase/pocketbase/models"
 )
@@ -14,8 +12,10 @@ templ TodosList(todos []*models.Record) {
     <ul>
       for _, v := range todos {
         <li data-id={v.Id}>
-          {v.GetString("name")}
-          <button hx-delete={fmt.Sprintf("/app/todos/%s", v.Id)} hx-target={fmt.Sprintf("[data-id='%s']", v.Id)} hx-swap="outerHTML">X</button>
+          <form method="POST" action={templ.URL("/app/todos/" + v.Id + "/delete")} hx-boost="true">
+            {v.GetString("name")}
+            <button type="submit">X</button>
+          </form>
         </li>
       }
     </ul>

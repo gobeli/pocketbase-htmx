@@ -7,7 +7,7 @@ This is a small demo on how to use [pocketbase](https://pocketbase.io/) as a fra
  - node/npx installed (only for dev)
 
 ## Setup
-If you have node installed you can start the dev server with `make dev`, else run `make build` and `make run`
+If you have node installed you can start the dev server with `make dev`, else run `make run`
 
 After setting up pocketbase import the pocketbase.json file and add a user in the user collection.
 
