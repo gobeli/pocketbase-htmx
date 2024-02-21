@@ -2,10 +2,10 @@ package app
 
 import (
   "github.com/gobeli/pocketbase-htmx/lib"
-  "github.com/pocketbase/pocketbase/models"
+	"github.com/gobeli/pocketbase-htmx/model"
 )
 
-templ TodosList(todos []*models.Record) {
+templ TodosList(todos []*model.Todo) {
   @lib.BaseLayout() {
     <h1>Todos</h1>
 
@@ -13,7 +13,7 @@ templ TodosList(todos []*models.Record) {
       for _, v := range todos {
         <li data-id={v.Id}>
           <form method="POST" action={templ.URL("/app/todos/" + v.Id + "/delete")} hx-boost="true">
-            {v.GetString("name")}
+            {v.Name}
             <button type="submit">X</button>
           </form>
         </li>
@@ -24,19 +24,19 @@ templ TodosList(todos []*models.Record) {
   }
 }
 
-templ TodoAdd(form *AddTodoFormValue, err error) {
+templ TodoAdd(form *model.Todo, err error) {
   @lib.BaseLayout() {
     @TodoAddForm(form, err)
   }
 }
 
-templ TodoAddForm(form *AddTodoFormValue, err error) {
+templ TodoAddForm(form *model.Todo, err error) {
   <form method="POST" hx-boost="true">
     <div>
       <label>Name</label>
       <input type="text" name="name" id="name" 
         if form != nil {
-          value={form.name}
+          value={form.Name}
         }
       />
     </div>

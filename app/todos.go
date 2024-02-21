@@ -4,8 +4,8 @@ import (
 	"github.com/a-h/templ"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/gobeli/pocketbase-htmx/lib"
+	"github.com/gobeli/pocketbase-htmx/model"
 	"github.com/labstack/echo/v5"
-	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/models"
@@ -14,8 +14,12 @@ import (
 func TodosGet(e *core.ServeEvent) func(echo.Context) error {
 	return func(c echo.Context) error {
 		var record *models.Record = c.Get(apis.ContextAuthRecordKey).(*models.Record)
-		todos := []*models.Record{}
-		e.App.Dao().RecordQuery("todos").Where(dbx.NewExp("user = {:id}", dbx.Params{"id": record.Id})).All(&todos)
+		todos, err := (&model.Todo{}).FindAll(e.App.Dao(), record)
+
+		if err != nil {
+			return err
+		}
+
 		return lib.Render(c, 200, TodosList(todos))
 	}
 }
@@ -23,15 +27,19 @@ func TodosGet(e *core.ServeEvent) func(echo.Context) error {
 func TodoDelete(e *core.ServeEvent) func(echo.Context) error {
 	return func(c echo.Context) error {
 		var authRecord *models.Record = c.Get(apis.ContextAuthRecordKey).(*models.Record)
-		id := c.PathParam("id")
-		record, err := e.App.Dao().FindRecordById("todos", id)
 
-		if err != nil || record.Get("user") != authRecord.Id {
+		id := c.PathParam("id")
+		todo := model.Todo{}
+		err := (&todo).FindById(e.App.Dao(), authRecord, id)
+
+		if err == nil {
+			err = todo.Delete(e.App.Dao())
+		}
+
+		if err != nil {
 			c.NoContent(400)
 			return nil
 		}
-
-		e.App.Dao().DeleteRecord(record)
 
 		return lib.HtmxRedirect(c, "/app/todos")
 	}
@@ -53,24 +61,12 @@ func TodoAddGet(c echo.Context) error {
 
 func TodoAddPost(e *core.ServeEvent) func(echo.Context) error {
 	return func(c echo.Context) error {
-		todo := AddTodoFormValue{name: c.FormValue("name")}
-		err := todo.Validate()
+		var authRecord *models.Record = c.Get(apis.ContextAuthRecordKey).(*models.Record)
+		todo := model.Todo{Name: c.FormValue("name"), User: authRecord.Id}
+		err := todo.Save(e.App.Dao())
 
 		if err == nil {
-			var authRecord *models.Record = c.Get(apis.ContextAuthRecordKey).(*models.Record)
-			todos, _ := e.App.Dao().FindCollectionByNameOrId("todos")
-			record := models.NewRecord(todos)
-
-			record.Load(map[string]any{
-				"user": authRecord.Id,
-				"name": todo.name,
-			})
-
-			err = e.App.Dao().SaveRecord(record)
-
-			if err == nil {
-				return lib.HtmxRedirect(c, "/app/todos")
-			}
+			return lib.HtmxRedirect(c, "/app/todos")
 		}
 
 		component := lib.HtmxRender(
