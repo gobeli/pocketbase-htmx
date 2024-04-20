@@ -45,9 +45,8 @@ func RegisterLoginRoutes(e *core.ServeEvent, group echo.Group) {
 		form := getLoginFormValue(c)
 		err := form.Validate()
 
-		var token *string
 		if err == nil {
-			token, err = lib.Login(e, form.username, form.password)
+			err = lib.Login(e, c, form.username, form.password)
 		}
 
 		if err != nil {
@@ -58,14 +57,6 @@ func RegisterLoginRoutes(e *core.ServeEvent, group echo.Group) {
 			)
 			return lib.Render(c, 200, component)
 		}
-
-		c.SetCookie(&http.Cookie{
-			Name:     middleware.AuthCookieName,
-			Value:    *token,
-			Path:     "/",
-			Secure:   true,
-			HttpOnly: true,
-		})
 
 		return lib.HtmxRedirect(c, "/app/profile")
 	})
